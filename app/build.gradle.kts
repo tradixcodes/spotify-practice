@@ -18,6 +18,9 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // Add these two lines 👇
+        manifestPlaceholders["redirectSchemeName"] = "melodify"
+        manifestPlaceholders["redirectHostName"] = "auth"
     }
 
     buildTypes {
