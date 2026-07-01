@@ -26,4 +26,19 @@ object RetrofitClient {
         .addConverterFactory(GsonConverterFactory.create())
         .build()
         .create(MelodifyApi::class.java)
+
+    private const val LRCLIB_BASE_URL = "https://lrclib.net/"
+
+    private val lrcLibClient = OkHttpClient.Builder()
+        .addInterceptor(loggingInterceptor)
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .build()
+
+    val lrcLibApi: LrcLibApi = Retrofit.Builder()
+        .baseUrl(LRCLIB_BASE_URL)
+        .client(lrcLibClient)
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+        .create(LrcLibApi::class.java)
 }

@@ -137,3 +137,20 @@ data class ItunesTrack(
     val primaryGenreName: String?,
     val trackTimeMillis: Long?
 )
+
+// LRCLIB Models
+data class LrcLibResponse(
+    val id: Int,
+    val trackName: String,
+    val artistName: String,
+    val albumName: String?,
+    val duration: Double?,
+    val instrumental: Boolean,
+    val plainLyrics: String?,
+    val syncedLyrics: String?
+)
+
+data class LyricLine(
+    val timestampMs: Long,
+    val text: String
+)

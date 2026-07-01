@@ -22,6 +22,9 @@ import coil.compose.AsyncImage
 import com.tradix.spotify.data.models.PlaylistItem
 import com.tradix.spotify.data.models.RecentlyPlayed
 import com.tradix.spotify.ui.theme.*
+import com.tradix.spotify.ui.player.PlayerViewModel
+import com.tradix.spotify.data.models.ItunesTrack
+import androidx.compose.foundation.clickable
 
 // Keeping recently played as placeholder until we have user auth
 val recentlyPlayedItems = listOf(
@@ -32,7 +35,7 @@ val recentlyPlayedItems = listOf(
 )
 
 @Composable
-fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
+fun HomeScreen(viewModel: HomeViewModel = viewModel(), playerViewModel: PlayerViewModel) {
     val uiState by viewModel.uiState.collectAsState()
 
     LazyColumn(
@@ -95,7 +98,11 @@ fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
             item {
                 PlaylistSection(
                     title = "🔥 Hot Right Now",
-                    items = uiState.hotTracks
+                    items = uiState.hotTracks,
+                    onItemClick = { playlistItem ->
+                        val track = viewModel.getTrackById(playlistItem.id)
+                        track?.let { playerViewModel.playTrack(it) }
+                    }
                 )
             }
         }
@@ -104,7 +111,11 @@ fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
             item {
                 PlaylistSection(
                     title = "🎵 Afrobeats",
-                    items = uiState.afrobeats
+                    items = uiState.afrobeats,
+                    onItemClick = { playlistItem ->
+                        val track = viewModel.getTrackById(playlistItem.id)
+                        track?.let { playerViewModel.playTrack(it) }
+                    }
                 )
             }
         }
@@ -113,7 +124,11 @@ fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
             item {
                 PlaylistSection(
                     title = "🎤 Hip Hop",
-                    items = uiState.hiphop
+                    items = uiState.hiphop,
+                    onItemClick = { playlistItem ->
+                        val track = viewModel.getTrackById(playlistItem.id)
+                        track?.let { playerViewModel.playTrack(it) }
+                    }
                 )
             }
         }
@@ -198,7 +213,11 @@ fun RecentlyPlayedChip(item: RecentlyPlayed) {
 }
 
 @Composable
-fun PlaylistSection(title: String, items: List<PlaylistItem>) {
+fun PlaylistSection(
+    title: String,
+    items: List<PlaylistItem>,
+    onItemClick: (PlaylistItem) -> Unit = {}
+) {
     Column(modifier = Modifier.padding(bottom = 24.dp)) {
         Text(
             text = title,
@@ -212,15 +231,22 @@ fun PlaylistSection(title: String, items: List<PlaylistItem>) {
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items(items) { item ->
-                PlaylistCard(item = item)
+                PlaylistCard(
+                    item = item,
+                    onClick = { onItemClick(item) }
+                )
             }
         }
     }
 }
 
 @Composable
-fun PlaylistCard(item: PlaylistItem) {
-    Column(modifier = Modifier.width(150.dp)) {
+fun PlaylistCard(item: PlaylistItem, onClick: () -> Unit = {}) {
+    Column(
+        modifier = Modifier
+            .width(150.dp)
+            .clickable { onClick() }
+    ) {
         AsyncImage(
             model = item.imageUrl,
             contentDescription = item.title,

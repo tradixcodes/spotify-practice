@@ -20,6 +20,7 @@ data class HomeUiState(
 class HomeViewModel : ViewModel() {
 
     private val repository = MelodifyRepository()
+    private val trackCache = mutableMapOf<String, com.tradix.spotify.data.models.ItunesTrack>()
 
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState
@@ -41,6 +42,16 @@ class HomeViewModel : ViewModel() {
                 val afroResult = afroDeferred.await()
                 val hipHopResult = hipHopDeferred.await()
 
+                // Cache all tracks for lookup
+                hotResult.getOrNull()?.forEach { track ->
+                    track.trackId?.let { trackCache[it.toString()] = track }
+                }
+                afroResult.getOrNull()?.forEach { track ->
+                    track.trackId?.let { trackCache[it.toString()] = track }
+                }
+                hipHopResult.getOrNull()?.forEach { track ->
+                    track.trackId?.let { trackCache[it.toString()] = track }
+                }
                 android.util.Log.d("HomeViewModel", "Hot result: ${hotResult.isSuccess}")
                 android.util.Log.d("HomeViewModel", "Hot error: ${hotResult.exceptionOrNull()?.message}")
                 android.util.Log.d("HomeViewModel", "Hot tracks: ${hotResult.getOrNull()?.size}")
@@ -60,6 +71,10 @@ class HomeViewModel : ViewModel() {
                 )
             }
         }
+    }
+
+    fun getTrackById(id: String): com.tradix.spotify.data.models.ItunesTrack? {
+        return trackCache[id]
     }
 
     fun retryLoading() {
