@@ -21,6 +21,12 @@ android {
         // Add these two lines 👇
         manifestPlaceholders["redirectSchemeName"] = "melodify"
         manifestPlaceholders["redirectHostName"] = "auth"
+
+        val localProperties = com.android.build.gradle.internal.cxx.configure.gradleLocalProperties(rootDir, providers)
+
+        buildConfigField("String", "SPOTIFY_CLIENT_ID", "\"${localProperties["SPOTIFY_CLIENT_ID"]}\"")
+        buildConfigField("String", "SPOTIFY_CLIENT_SECRET", "\"${localProperties["SPOTIFY_CLIENT_SECRET"]}\"")
+        buildConfigField("String", "SPOTIFY_REDIRECT_URI", "\"${localProperties["SPOTIFY_REDIRECT_URI"]}\"")
     }
 
     buildTypes {
@@ -44,6 +50,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
