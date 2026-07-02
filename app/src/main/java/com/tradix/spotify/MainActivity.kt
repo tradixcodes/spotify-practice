@@ -4,81 +4,47 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.animation.*
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.tradix.spotify.ui.components.BottomNavBar
-import com.tradix.spotify.ui.components.BottomNavItem
-import com.tradix.spotify.ui.home.HomeScreen
-import com.tradix.spotify.ui.library.LibraryScreen
-import com.tradix.spotify.ui.player.PlayerScreen
+import com.tradix.spotify.ui.components.PhoneLayout
+import com.tradix.spotify.ui.components.TabletLayout
+import com.tradix.spotify.ui.components.isTablet
 import com.tradix.spotify.ui.player.PlayerViewModel
-import com.tradix.spotify.ui.search.SearchScreen
 import com.tradix.spotify.ui.theme.SpotifyTheme
 
 class MainActivity : ComponentActivity() {
+    @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             SpotifyTheme {
-                MelodifyApp()
+                val windowSizeClass = calculateWindowSizeClass(this)
+                MelodifyApp(isTablet = windowSizeClass.isTablet())
             }
         }
     }
 }
 
 @Composable
-fun MelodifyApp() {
+fun MelodifyApp(isTablet: Boolean = false) {
     val navController = rememberNavController()
     val playerViewModel: PlayerViewModel = viewModel()
     val playerUiState by playerViewModel.uiState.collectAsState()
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Scaffold(
-            bottomBar = {
-                BottomNavBar(navController = navController)
-            }
-        ) { innerPadding ->
-            NavHost(
-                navController = navController,
-                startDestination = BottomNavItem.Home.route,
-                modifier = Modifier.padding(innerPadding),
-                enterTransition = { EnterTransition.None },
-                exitTransition = { ExitTransition.None },
-                popEnterTransition = { EnterTransition.None },
-                popExitTransition = { ExitTransition.None}
-            ) {
-                composable(BottomNavItem.Home.route) {
-                    HomeScreen(playerViewModel = playerViewModel)
-                }
-                composable(BottomNavItem.Search.route) {
-                    SearchScreen()
-                }
-                composable(BottomNavItem.Library.route) {
-                    LibraryScreen()
-                }
-            }
-        }
-
-        // Full screen player overlay
-        AnimatedVisibility(
-            visible = playerUiState.showPlayer,
-            enter = slideInVertically(initialOffsetY = { it }),
-            exit = slideOutVertically(targetOffsetY = { it })
-        ) {
-            PlayerScreen(
-                viewModel = playerViewModel,
-                onDismiss = { playerViewModel.hidePlayer() }
-            )
-        }
+    if (isTablet) {
+        TabletLayout(
+            navController = navController,
+            playerViewModel = playerViewModel
+        )
+    } else {
+        PhoneLayout(
+            navController = navController,
+            playerViewModel = playerViewModel,
+            playerUiState = playerUiState
+        )
     }
 }
